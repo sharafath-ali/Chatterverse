@@ -3,10 +3,13 @@ import authRoutes from './routes/authRoutes.js'
 import { connectDB } from './lib/db.js'
 import morgan from 'morgan'
 import { configDotenv } from "dotenv";
+import cookieParser from "cookie-parser";
+
 configDotenv()
 
 const Port = process.env.PORT
 const app = express()
+app.use(cookieParser())
 app.use(morgan('dev'))
 app.use(express.json())
 
