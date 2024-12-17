@@ -77,7 +77,8 @@ const updateProfile = async (req, res) => {
     if (!profilePic) {
       return res.status(400).json({ message: "Profile pic is required" })
     }
-    const result = await cloudinary.uploader.destroy("profilePic", profilePic)
+    const result = await cloudinary.uploader.upload(profilePic, { folder: "profilePic" });
+
     const userUpdated = await User.findByIdAndUpdate(req.user._id, { profilePic: result.secure_url }, { new: true })
     return res.status(200).json(userUpdated)
   }
