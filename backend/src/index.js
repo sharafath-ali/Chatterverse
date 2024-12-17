@@ -4,6 +4,7 @@ import { connectDB } from './lib/db.js'
 import morgan from 'morgan'
 import { configDotenv } from "dotenv";
 import cookieParser from "cookie-parser";
+import messageRoutes from './routes/message.route.js'
 
 configDotenv()
 
@@ -14,6 +15,7 @@ app.use(morgan('dev'))
 app.use(express.json())
 
 app.use('/api/auth', authRoutes)
+app.use('/api/message', messageRoutes)
 
 app.listen(Port, () => {
   console.log(`Server is running on 'http://localhost:${Port}'`);
