@@ -40,7 +40,7 @@ const login = async (req, res) => {
     }
     const user = await User.findOne({ email })
     if (user) {
-      const isMatch = bcrypt.compare(password, user.password)
+      const isMatch = await bcrypt.compare(password, user.password)
       if (isMatch) {
         const token = generateToken(user._id, res)
         return res.status(200).json(user)

@@ -3,17 +3,16 @@ import { Eye, EyeOff, Loader2, Lock, Mail, MessageSquare, User } from "lucide-re
 import { Link } from "react-router-dom";
 import AuthImagePattern from "../components/AuthImagePattern";
 import toast from "react-hot-toast";
+import { useAuthStore } from "../store/useAuthStore";
 
 const SignUpPage = () => {
+  const { signup, isSigningUp } = useAuthStore();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     password: "",
   });
-
-  const signup =()=>{};
-  const isSigningUp = false
 
   const validateForm = () => {
     if (!formData.fullName.trim()) return toast.error("Full name is required");
