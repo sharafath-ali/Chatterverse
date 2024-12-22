@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useChatStore } from "../store/useChatStore";
 import SidebarSkeleton from "./skeletons/SidebarSkeleton";
 import { Users } from "lucide-react";
@@ -10,9 +10,15 @@ const Sidebar = () => {
   const { onlineUsers } = useAuthStore();
   const [showOnlineOnly, setShowOnlineOnly] = useState(false);
 
+  const handleUserClick = useCallback((user) => {
+    if (selectedUser?._id !== user._id) {
+      setSelectedUser(user);
+    }
+  }, [selectedUser]);
+
   useEffect(() => {
     getUsers();
-  }, [getUsers]);
+  }, []);
 
   const filteredUsers = showOnlineOnly
     ? users.filter((user) => onlineUsers.includes(user._id))
@@ -46,7 +52,7 @@ const Sidebar = () => {
         {filteredUsers.map((user) => (
           <button
             key={user._id}
-            onClick={() => setSelectedUser(user)}
+            onClick={() => handleUserClick(user)}
             className={`
               w-full p-3 flex items-center gap-3
               hover:bg-base-300 transition-colors

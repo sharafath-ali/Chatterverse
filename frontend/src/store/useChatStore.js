@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios";
 import { toast } from "react-hot-toast";
-import { get } from "mongoose";
 
 export const useChatStore = create((set) => ({
   messages: [],
@@ -25,7 +24,7 @@ export const useChatStore = create((set) => ({
   getMessages: async (userId) => {
     set({ isMessagesLoading: true });
     try {
-      const res = await axiosInstance.get(`/messages/${userId}`);
+      const res = await axiosInstance.get(`/message/${userId}`);
       set({ messages: res.data });
     } catch (error) {
       toast.error(error.response.data.message);
