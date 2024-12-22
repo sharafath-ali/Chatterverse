@@ -1,12 +1,13 @@
 import { useRef, useState } from "react";
 import { Image, Send, X } from "lucide-react";
 import toast from "react-hot-toast";
+import { useChatStore } from "../store/useChatStore";
 
 const MessageInput = () => {
+  const { sendMessage } = useChatStore();
   const [text, setText] = useState("");
   const [imagePreview, setImagePreview] = useState(null);
   const fileInputRef = useRef(null);
-   const sendMessage =()=>{}
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
