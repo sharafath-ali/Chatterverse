@@ -1,14 +1,18 @@
 import { create } from "zustand";
 import axiosInstance from "../lib/axios";
 import { toast } from "react-hot-toast";
+import { io } from "socket.io-client";
 
-export const useAuthStore = create((set) => ({
+const BASE_URL = import.meta.env.MODE === "development" ? "http://localhost:5000" : "/";
+
+export const useAuthStore = create((set, get) => ({
   user: null,
   isCheckingAuth: false,
   isSigningUp: false,
   isLoggingIng: false,
   isUpdatingProfile: false,
   onlineUsers: [],
+  socket: null,
 
   CheckAuth: async () => {
     try {
@@ -16,11 +20,12 @@ export const useAuthStore = create((set) => ({
       const res = await axiosInstance.get("/auth/checkAuth")
       console.log(res)
       set({ user: res.data });
+      get().connectSocket()
     }
     catch (e) {
       console.log(e);
       set({ user: null });
-      toast.error(e.response.data.message);
+      toast.error(e.response.message);
     }
     finally {
       set({ isCheckingAuth: false })
@@ -32,6 +37,7 @@ export const useAuthStore = create((set) => ({
       const res = axiosInstance.post("/auth/logout");
       toast.success("Logout successful");
       set({ user: null });
+      get().disconnectSocket()
     }
     catch (e) {
       console.log(e)
@@ -46,6 +52,7 @@ export const useAuthStore = create((set) => ({
       console.log(res)
       toast.success("Signup successful");
       set({ user: res.data });
+      get().connectSocket()
     }
     catch (e) {
       console.log(e);
@@ -63,6 +70,7 @@ export const useAuthStore = create((set) => ({
       console.log(res)
       toast.success("Login successful");
       set({ user: res.data });
+      get().connectSocket()
     }
     catch (e) {
       console.log(e);
@@ -88,5 +96,27 @@ export const useAuthStore = create((set) => ({
     finally {
       set({ isUpdatingProfile: false })
     }
+  },
+
+  connectSocket: () => {
+    const { user } = get();
+    if (!user || get().socket?.connected) return;
+
+    const socket = io(BASE_URL, {
+      query: {
+        userId: user._id,
+      },
+    });
+    socket.connect();
+
+    set({ socket: socket });
+
+    socket.on("getOnlineUsers", (userIds) => {
+      set({ onlineUsers: userIds });
+    });
+  },
+
+  disconnectSocket: () => {
+    if (get().socket?.connected) get().socket.disconnect();
   },
 }));
