@@ -24,6 +24,7 @@ const VideoCall = () => {
 
   const localVideoRef = useRef(null);
   const remoteVideoRef = useRef(null);
+  const remoteAudioRef = useRef(null);
 
   // Attach local stream to video element
   useEffect(() => {
@@ -32,10 +33,18 @@ const VideoCall = () => {
     }
   }, [localStream]);
 
-  // Attach remote stream to video element
+  // Attach remote stream to video element (for video calls)
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream) {
       remoteVideoRef.current.srcObject = remoteStream;
+    }
+  }, [remoteStream]);
+
+  // ALWAYS attach remote stream to a hidden audio element for playback
+  // This is critical for audio-only calls where no <video> element is rendered
+  useEffect(() => {
+    if (remoteAudioRef.current && remoteStream) {
+      remoteAudioRef.current.srcObject = remoteStream;
     }
   }, [remoteStream]);
 
@@ -47,6 +56,8 @@ const VideoCall = () => {
     <div className="fixed inset-0 z-[100] flex flex-col" style={{
       background: "linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 50%, #16213e 100%)",
     }}>
+      {/* Hidden audio element — ensures remote audio always plays regardless of call type */}
+      <audio ref={remoteAudioRef} autoPlay playsInline />
       {/* Remote Video / Audio Avatar */}
       <div className="flex-1 relative flex items-center justify-center overflow-hidden">
         {isVideoCall && remoteStream ? (

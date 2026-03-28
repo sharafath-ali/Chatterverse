@@ -20,6 +20,7 @@ export const useVideoCallStore = create((set, get) => ({
   peerConnection: null,
   isAudioMuted: false,
   isVideoOff: false,
+  _iceCandidateBuffer: [], // Buffer for ICE candidates that arrive before PC is ready
 
   // ── Initiate a call ──────────────────────────────────────────
   initiateCall: async (targetUser, callType = "video") => {
@@ -139,6 +140,9 @@ export const useVideoCallStore = create((set, get) => ({
       to: remoteUser._id,
       offer: pc.localDescription,
     });
+
+    // Flush any buffered ICE candidates
+    get()._flushIceCandidates();
   },
 
   // ── Handle received offer and send answer ────────────────────
@@ -190,6 +194,9 @@ export const useVideoCallStore = create((set, get) => ({
       to: remoteUser._id,
       answer: pc.localDescription,
     });
+
+    // Flush any buffered ICE candidates
+    get()._flushIceCandidates();
   },
 
   // ── Handle received answer ───────────────────────────────────
@@ -197,17 +204,37 @@ export const useVideoCallStore = create((set, get) => ({
     const { peerConnection } = get();
     if (!peerConnection) return;
     await peerConnection.setRemoteDescription(new RTCSessionDescription(answer));
+    // Flush any buffered ICE candidates now that remote description is set
+    get()._flushIceCandidates();
   },
 
   // ── Handle received ICE candidate ────────────────────────────
   handleIceCandidate: async (candidate) => {
     const { peerConnection } = get();
-    if (!peerConnection) return;
+    if (!peerConnection || !peerConnection.remoteDescription) {
+      // Buffer candidates until peer connection and remote description are ready
+      set({ _iceCandidateBuffer: [...get()._iceCandidateBuffer, candidate] });
+      return;
+    }
     try {
       await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
     } catch (err) {
       console.error("Error adding ICE candidate:", err);
     }
+  },
+
+  // ── Flush buffered ICE candidates ────────────────────────────
+  _flushIceCandidates: async () => {
+    const { peerConnection, _iceCandidateBuffer } = get();
+    if (!peerConnection || _iceCandidateBuffer.length === 0) return;
+    for (const candidate of _iceCandidateBuffer) {
+      try {
+        await peerConnection.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (err) {
+        console.error("Error adding buffered ICE candidate:", err);
+      }
+    }
+    set({ _iceCandidateBuffer: [] });
   },
 
   // ── Toggle audio ─────────────────────────────────────────────
@@ -261,6 +288,7 @@ export const useVideoCallStore = create((set, get) => ({
       peerConnection: null,
       isAudioMuted: false,
       isVideoOff: false,
+      _iceCandidateBuffer: [],
     });
   },
 
