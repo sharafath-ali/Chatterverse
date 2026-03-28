@@ -1,13 +1,19 @@
 {
   "name": "chatterverse",
   "version": "1.0.0",
-  "description": "��#\u0000 \u0000C\u0000h\u0000a\u0000t\u0000t\u0000e\u0000r\u0000v\u0000e\u0000r\u0000s\u0000e\u0000\r\u0000 \u0000",
+  "description": "Chatterverse — A full-stack real-time chat and video calling application built with React, Node.js, Socket.IO, and WebRTC.",
   "main": "index.js",
   "scripts": {
     "build": "npm install --prefix backend && npm install --prefix frontend && npm run build --prefix frontend",
     "start": "npm run start --prefix backend"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "mern",
+    "socket.io",
+    "webrtc",
+    "video-call",
+    "real-time"
+  ],
+  "author": "Sharafath Ali",
   "license": "ISC"
 }
