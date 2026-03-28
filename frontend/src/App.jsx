@@ -11,15 +11,29 @@ import { Navigate } from 'react-router-dom'
 import { useThemeStore } from './store/useThemeStore'
 import { useEffect } from 'react'
 import { useAuthStore } from './store/useAuthStore'
+import { useVideoCallStore } from './store/useVideoCallStore'
 import { Loader } from 'lucide-react'
+import VideoCall from './components/VideoCall.jsx'
+import IncomingCallModal from './components/IncomingCallModal.jsx'
 
 function App() {
   const { theme } = useThemeStore();
-  const { user, CheckAuth, isCheckingAuth } = useAuthStore();
+  const { user, CheckAuth, isCheckingAuth, socket } = useAuthStore();
+  const { setupCallListeners, removeCallListeners } = useVideoCallStore();
 
   useEffect(() => {
     CheckAuth();
   }, [])
+
+  // Setup WebRTC call listeners when socket is ready
+  useEffect(() => {
+    if (socket && user) {
+      setupCallListeners();
+      return () => {
+        removeCallListeners();
+      };
+    }
+  }, [socket, user])
 
   if (isCheckingAuth && !user)
     return (
@@ -40,6 +54,14 @@ function App() {
       </Routes>
 
       <Toaster />
+
+      {/* Global Video Call Overlays */}
+      {user && (
+        <>
+          <VideoCall />
+          <IncomingCallModal />
+        </>
+      )}
     </div>
   )
 }
