@@ -1,4 +1,5 @@
 import User from '../models/user.model.js'
+import * as Sentry from "@sentry/node";
 import bcrypt from 'bcryptjs'
 import { generateToken } from '../lib/utils.js'
 import cloudinary from '../lib/cloudinary.js'
@@ -28,6 +29,7 @@ const signup = async (req, res) => {
     }
   } catch (error) {
     console.log(error)
+    Sentry.captureException(error);
     return res.status(400).json({ error: error.message })
   }
 }
@@ -55,6 +57,7 @@ const login = async (req, res) => {
   }
   catch (error) {
     console.log(error)
+    Sentry.captureException(error);
     return res.status(400).json({ error: error.message })
   }
 }
@@ -66,6 +69,7 @@ const logout = (req, res) => {
   }
   catch (error) {
     console.log(error)
+    Sentry.captureException(error);
     return res.status(400).json({ error: error.message })
   }
 }
@@ -84,6 +88,7 @@ const updateProfile = async (req, res) => {
   }
   catch (error) {
     console.log(error)
+    Sentry.captureException(error);
     return res.status(400).json({ error: error.message })
   }
 }
@@ -94,6 +99,7 @@ const checkAuth = (req, res) => {
   }
   catch (error) {
     console.log(error)
+    Sentry.captureException(error);
     return res.status(400).json({ error: error.message })
   }
 }

@@ -1,4 +1,5 @@
 import User from "../models/user.model.js"
+import * as Sentry from "@sentry/node";
 import Message from "../models/message.model.js"
 import cloudinary from "../lib/cloudinary.js"
 import { getReceiverSocketId, io } from "../lib/socket.js"
@@ -11,6 +12,7 @@ export const getUsersForSidebar = async (req, res) => {
   }
   catch (error) {
     console.log(error)
+    Sentry.captureException(error);
     return res.status(400).json({ error: error.message })
   }
 }
@@ -30,6 +32,7 @@ export const getMessages = async (req, res) => {
   }
   catch (error) {
     console.log(error)
+    Sentry.captureException(error);
     return res.status(400).json({ error: error.message })
   }
 }
@@ -64,6 +67,7 @@ export const sendMessage = async (req, res) => {
   }
   catch (error) {
     console.log(error)
+    Sentry.captureException(error);
     return res.status(400).json({ error: error.message })
   }
 }
