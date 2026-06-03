@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
 import User from '../models/user.model.js'
+import * as Sentry from '@sentry/node';
 
 dotenv.config()
 
@@ -21,6 +22,7 @@ export const protectRoute = async (req, res, next) => {
     req.user = user
     next()
   } catch (error) {
+    Sentry.captureException(error);
     res.status(401).json({ message: 'Not logged in' })
   }
 }
