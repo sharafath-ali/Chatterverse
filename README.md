@@ -108,6 +108,84 @@ The video calling feature uses a **Signaling + P2P** architecture to minimize la
 
 ---
 
+## 📋 Logging & Observability
+
+Chatterverse uses **[Sentry](https://sentry.io/)** for end-to-end error tracking, structured logging, performance tracing, and profiling in the Node.js backend.
+
+### Setup
+
+Sentry is initialised in `backend/src/instrument.js` before anything else loads. This file is imported as the **very first line** of `src/index.js` to ensure all errors and logs are captured from startup.
+
+```js
+// backend/src/index.js
+import "./instrument.js"; // ← must be first
+import * as Sentry from "@sentry/node";
+```
+
+### Structured Log Levels
+
+All logging uses `Sentry.logger.*` for structured, queryable log events instead of raw `console.log`. Three levels are used consistently across the codebase:
+
+| Level | Method | Used for |
+|---|---|---|
+| ✅ Info | `Sentry.logger.info(msg, ctx)` | Successful operations, lifecycle events |
+| ⚠️ Warn | `Sentry.logger.warn(msg, ctx)` | Validation failures, bad input, expected denials |
+| ❌ Error | `Sentry.logger.error(msg, ctx)` | Caught exceptions before `captureException` |
+
+### What is Logged
+
+#### Auth (`authController.js`)
+| Event | Level | Context |
+|---|---|---|
+| Signup attempt | `info` | `email` |
+| Password too short | `warn` | `email` |
+| Email already in use | `warn` | `email` |
+| Signup success | `info` | `userId`, `email` |
+| Login attempt | `info` | `email` |
+| Missing credentials | `warn` | — |
+| Incorrect password | `warn` | `email` |
+| User not found | `warn` | `email` |
+| Login success | `info` | `userId`, `email` |
+| Logout | `info` | — |
+| Profile update attempt | `info` | `userId` |
+| Cloudinary upload done | `info` | `userId`, `url` |
+| Profile update success | `info` | `userId` |
+| Auth check passed | `info` | `userId` |
+
+#### Messages (`messageController.js`)
+| Event | Level | Context |
+|---|---|---|
+| Fetch sidebar users | `info` | `userId` |
+| Fetch messages | `info` | `currentUserId`, `userToChatId` |
+| Send message | `info` | `senderId`, `receiverId` |
+| Image upload to Cloudinary | `info` | `senderId` |
+| Socket emit to receiver | `info` | `receiverSocketId` |
+
+#### Auth Middleware (`authMiddleware.js`)
+| Event | Level | Context |
+|---|---|---|
+| Missing token | `warn` | — |
+| Route protection passed | `info` | `userId` |
+
+### Sentry Features Enabled
+
+| Feature | Config |
+|---|---|
+| **Error Capture** | `Sentry.captureException(error)` on every catch block |
+| **Structured Logs** | `enableLogs: true` |
+| **Distributed Tracing** | `tracesSampleRate: 1.0` (100%) |
+| **Profiling** | `profileSessionSampleRate: 1.0`, `profileLifecycle: 'trace'` |
+| **PII Collection** | `sendDefaultPii: true` |
+| **Express Error Handler** | `Sentry.setupExpressErrorHandler(app)` |
+
+### Required Environment Variable
+
+```env
+SENTRY_DSN=https://<key>@<org>.ingest.sentry.io/<project-id>
+```
+
+---
+
 ## ⚖️ License
 
 Distributed under the **ISC License**. See `LICENSE` for more information.

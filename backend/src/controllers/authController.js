@@ -28,7 +28,7 @@ const signup = async (req, res) => {
       return res.status(400).send("User cannot be created")
     }
   } catch (error) {
-    console.log(error)
+    Sentry.logger.error('Signup error', { error: error.message });
     Sentry.captureException(error);
     return res.status(400).json({ error: error.message })
   }
@@ -56,7 +56,7 @@ const login = async (req, res) => {
     }
   }
   catch (error) {
-    console.log(error)
+    Sentry.logger.error('Login error', { error: error.message });
     Sentry.captureException(error);
     return res.status(400).json({ error: error.message })
   }
@@ -68,7 +68,7 @@ const logout = (req, res) => {
     return res.status(200).json({ message: "Logged out successfully" })
   }
   catch (error) {
-    console.log(error)
+    Sentry.logger.error('Logout error', { error: error.message });
     Sentry.captureException(error);
     return res.status(400).json({ error: error.message })
   }
@@ -87,7 +87,7 @@ const updateProfile = async (req, res) => {
     return res.status(200).json(userUpdated)
   }
   catch (error) {
-    console.log(error)
+    Sentry.logger.error('Profile update error', { error: error.message, userId: req.user?._id?.toString() });
     Sentry.captureException(error);
     return res.status(400).json({ error: error.message })
   }
@@ -98,7 +98,7 @@ const checkAuth = (req, res) => {
     return res.status(200).json(req.user)
   }
   catch (error) {
-    console.log(error)
+    Sentry.logger.error('Auth check error', { error: error.message });
     Sentry.captureException(error);
     return res.status(400).json({ error: error.message })
   }
